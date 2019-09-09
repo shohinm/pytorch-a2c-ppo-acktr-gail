@@ -25,7 +25,8 @@ class Policy(nn.Module):
             else:
                 raise NotImplementedError
 
-        self.base = base(obs_shape[0], **base_kwargs)
+        # Observation space is reduced by 1 in the first dimension since we are currently not using sonar
+        self.base = base(obs_shape[0]-1, **base_kwargs)
 
         if action_space.__class__.__name__ == "Discrete":
             num_outputs = action_space.n
