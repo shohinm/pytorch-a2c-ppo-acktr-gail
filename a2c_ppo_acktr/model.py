@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import pdb
 from a2c_ppo_acktr.distributions import Bernoulli, Categorical, DiagGaussian
 from a2c_ppo_acktr.utils import init
 
@@ -52,6 +52,7 @@ class Policy(nn.Module):
         raise NotImplementedError
 
     def act(self, inputs, rnn_hxs, masks, deterministic=False):
+        # pdb.set_trace()
         value, actor_features, rnn_hxs = self.base(inputs, rnn_hxs, masks)
         dist = self.dist(actor_features)
 
@@ -82,7 +83,6 @@ class Policy(nn.Module):
 class NNBase(nn.Module):
     def __init__(self, recurrent, recurrent_input_size, hidden_size):
         super(NNBase, self).__init__()
-
         self._hidden_size = hidden_size
         self._recurrent = recurrent
 
@@ -173,12 +173,19 @@ class CNNBase(NNBase):
         init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
                                constant_(x, 0), nn.init.calculate_gain('relu'))
 
+        # self.main = nn.Sequential(
+        #     init_(nn.Conv2d(num_inputs, 32, 8, stride=4)), nn.ReLU(),
+        #     init_(nn.Conv2d(32, 64, 4, stride=2)), nn.ReLU(),
+        #     init_(nn.Conv2d(64, 32, 3, stride=1)), nn.ReLU(), Flatten(),
+        #     init_(nn.Linear(32 * 7 * 7, hidden_size)), nn.ReLU())
+
         self.main = nn.Sequential(
             init_(nn.Conv2d(num_inputs, 32, 8, stride=4)), nn.ReLU(),
             init_(nn.Conv2d(32, 64, 4, stride=2)), nn.ReLU(),
             init_(nn.Conv2d(64, 32, 3, stride=1)), nn.ReLU(), Flatten(),
-            init_(nn.Linear(32 * 7 * 7, hidden_size)), nn.ReLU())
+            init_(nn.Linear(99712, hidden_size)), nn.ReLU())
 
+        # pdb.set_trace()
         init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
                                constant_(x, 0))
 
@@ -187,11 +194,12 @@ class CNNBase(NNBase):
         self.train()
 
     def forward(self, inputs, rnn_hxs, masks):
+        # pdb.set_trace()
+        inputs = inputs[:,0:3,:,:] # extract just the rgb image, inputs[0,3,0,0:7] is other info
         x = self.main(inputs / 255.0)
 
         if self.is_recurrent:
             x, rnn_hxs = self._forward_gru(x, rnn_hxs, masks)
-
         return self.critic_linear(x), x, rnn_hxs
 
 

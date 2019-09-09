@@ -88,7 +88,7 @@ def make_env_from_gym_env(env2, seed, rank, log_dir, allow_early_resets):
                 allow_early_resets=allow_early_resets)
         # If the input has shape (W,H,3), wrap for PyTorch convolutions
         obs_shape = env.observation_space.shape
-
+        print(obs_shape)
         if len(obs_shape) == 3 and obs_shape[2] in [1, 4]:
             env = TransposeImage(env, op=[2, 0, 1])
 
@@ -158,7 +158,8 @@ def make_vec_envs_from_gym_env(env,
     if num_frame_stack is not None:
         envs = VecPyTorchFrameStack(envs, num_frame_stack, device)
     elif len(envs.observation_space.shape) == 3:
-        envs = VecPyTorchFrameStack(envs, 4, device)
+        # envs = VecPyTorchFrameStack(envs, 4, device)
+        envs = VecPyTorchFrameStack(envs, 1, device)
 
     return envs
 
