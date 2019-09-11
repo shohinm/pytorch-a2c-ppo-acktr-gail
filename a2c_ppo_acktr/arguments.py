@@ -61,6 +61,11 @@ def get_args():
         default=0.5,
         help='value loss coefficient (default: 0.5)')
     parser.add_argument(
+        '--action-loss-coef',
+        type=float,
+        default=1,
+        help='action loss coefficient (default: 1)')
+    parser.add_argument(
         '--max-grad-norm',
         type=float,
         default=0.5,

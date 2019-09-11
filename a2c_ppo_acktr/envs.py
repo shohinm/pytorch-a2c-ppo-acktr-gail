@@ -147,11 +147,7 @@ def make_vec_envs_from_gym_env(env,
     else:
         envs = DummyVecEnv(envs)
 
-    if len(envs.observation_space.shape) == 1:
-        if gamma is None:
-            envs = VecNormalize(envs, ret=False)
-        else:
-            envs = VecNormalize(envs, gamma=gamma)
+    envs = VecNormalize(envs, gamma=gamma)
 
     envs = VecPyTorch(envs, device)
 
