@@ -240,6 +240,8 @@ class VecNormalize(VecNormalize_):
     def __init__(self, *args, **kwargs):
         super(VecNormalize, self).__init__(*args, **kwargs)
         self.training = True
+        # Making ob_rms None doesn't normalize observations
+        self.ob_rms = None
 
     def _obfilt(self, obs, update=True):
         if self.ob_rms:
