@@ -154,6 +154,11 @@ def get_args():
         action='store_true',
         default=False,
         help='use a linear schedule on the learning rate')
+    parser.add_argument(
+        '--max-episode-length',
+        type=int,
+        default=500,
+        help='Max episode length (default: 500)')
     args = parser.parse_args()
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
