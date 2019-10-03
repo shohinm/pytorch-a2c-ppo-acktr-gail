@@ -117,10 +117,15 @@ def get_args():
         type=int,
         default=None,
         help='eval interval, one eval per n updates (default: None)')
+    # parser.add_argument(
+    #     '--num-env-steps',
+    #     type=int,
+    #     default=10e6,
+    #     help='number of environment steps to train (default: 10e6)')
     parser.add_argument(
         '--num-env-steps',
         type=int,
-        default=10e6,
+        default=160000,
         help='number of environment steps to train (default: 10e6)')
     parser.add_argument(
         '--env-name',
@@ -159,6 +164,11 @@ def get_args():
         type=int,
         default=500,
         help='Max episode length (default: 500)')
+    parser.add_argument(
+        '--run-dir',
+        default=None,
+        help='Path to existing model and results (default: None)')
+
     args = parser.parse_args()
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
