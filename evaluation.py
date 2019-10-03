@@ -52,8 +52,9 @@ def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir,
 
 def evaluate_gym_env(actor_critic, ob_rms, envs, seed, num_processes, eval_log_dir,
              device, num_steps = 10):
-    # eval_envs = make_vec_envs_from_gym_env(env, seed + num_processes, num_processes,
-    #                           None, eval_log_dir, device, True)
+
+    print("Running evaluation \n")
+    envs.envs[0].set_is_binary_reward(True)
 
     vec_norm = utils.get_vec_normalize(envs)
     
@@ -90,7 +91,8 @@ def evaluate_gym_env(actor_critic, ob_rms, envs, seed, num_processes, eval_log_d
             if 'episode' in info.keys():
                 eval_episode_rewards.append(info['episode']['r'])
 
-    envs.close()
+    # envs.close()
+    envs.envs[0].set_is_binary_reward(False)
 
     f = open(eval_log_dir + "stats.txt", "w+")
     print("Evaluation using {} episodes: mean reward {:.5f} | median reward {:.5f} | min reward {:.5f} | max reward {:.5f}\n".format(

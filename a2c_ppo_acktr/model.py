@@ -180,11 +180,18 @@ class CNNBase(NNBase):
         #     init_(nn.Conv2d(64, 32, 3, stride=1)), nn.ReLU(), Flatten(),
         #     init_(nn.Linear(32 * 7 * 7, hidden_size)), nn.ReLU())
 
+        # self.main = nn.Sequential(
+        #     init_(nn.Conv2d(num_inputs, 32, 8, stride=4)), nn.ReLU(),
+        #     init_(nn.Conv2d(32, 64, 4, stride=2)), nn.ReLU(),
+        #     init_(nn.Conv2d(64, 32, 3, stride=1)), nn.ReLU(), Flatten(),
+        #     init_(nn.Linear(99712, hidden_size)), nn.ReLU())
+
         self.main = nn.Sequential(
-            init_(nn.Conv2d(num_inputs, 32, 8, stride=4)), nn.ReLU(),
-            init_(nn.Conv2d(32, 64, 4, stride=2)), nn.ReLU(),
-            init_(nn.Conv2d(64, 32, 3, stride=1)), nn.ReLU(), Flatten(),
-            init_(nn.Linear(99712, hidden_size)), nn.ReLU())
+            init_(nn.Conv2d(num_inputs, 16, 8, stride=4)), nn.ReLU(), nn.MaxPool2d(4),
+            init_(nn.Conv2d(16, 32, 4, stride=2)), nn.ReLU(),
+            init_(nn.Conv2d(32, 32, 3, stride=1)), nn.ReLU(), Flatten(),
+            init_(nn.Linear(4096, hidden_size)), nn.ReLU())
+
 
         # pdb.set_trace()
         init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
@@ -195,10 +202,9 @@ class CNNBase(NNBase):
         self.train()
 
     def forward(self, inputs, rnn_hxs, masks):
-        # pdb.set_trace()
         inputs = inputs[:,0:3,:,:] # extract just the rgb image, inputs[0,3,0,0:7] is other info
         x = self.main(inputs / 255.0)
-
+        # import IPython; IPython.embed(); exit()
         if self.is_recurrent:
             x, rnn_hxs = self._forward_gru(x, rnn_hxs, masks)
         return self.critic_linear(x), x, rnn_hxs
