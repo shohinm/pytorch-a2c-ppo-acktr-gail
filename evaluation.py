@@ -70,7 +70,6 @@ def evaluate_gym_env(actor_critic, ob_rms, envs, seed, num_processes, eval_log_d
     eval_masks = torch.zeros(num_processes, 1, device=device)
 
     while len(eval_episode_rewards) < num_steps:
-        print("Episode number: {}".format(len(eval_episode_rewards)+1))
         with torch.no_grad():
             # pdb.set_trace()
             _, action, _, eval_recurrent_hidden_states = actor_critic.act(
@@ -89,6 +88,7 @@ def evaluate_gym_env(actor_critic, ob_rms, envs, seed, num_processes, eval_log_d
 
         for info in infos:
             if 'episode' in info.keys():
+                print("Evaluation| Episode number: {}".format(len(eval_episode_rewards)+1))
                 eval_episode_rewards.append(info['episode']['r'])
 
     # envs.close()
