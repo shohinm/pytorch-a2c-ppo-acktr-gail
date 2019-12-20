@@ -168,6 +168,11 @@ def get_args():
         '--run-dir',
         default=None,
         help='Path to existing model and results (default: None)')
+    parser.add_argument(
+        '--plot_reward_dists',
+        action='store_true',
+        default=False,
+        help='Plot reward distributions for bandits arm')
 
     args = parser.parse_args()
 
