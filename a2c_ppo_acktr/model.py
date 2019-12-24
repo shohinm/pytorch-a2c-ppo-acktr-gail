@@ -27,7 +27,6 @@ class Policy(nn.Module):
 
         # Observation space is reduced by 1 in the first dimension since we are currently not using sonar
         self.base = base(obs_shape[0]-1, **base_kwargs)
-
         if action_space.__class__.__name__ == "Discrete":
             num_outputs = action_space.n
             self.dist = Categorical(self.base.output_size, num_outputs)
@@ -53,8 +52,8 @@ class Policy(nn.Module):
         raise NotImplementedError
 
     def act(self, inputs, rnn_hxs, masks, deterministic=False):
-        # pdb.set_trace()
         value, actor_features, rnn_hxs = self.base(inputs, rnn_hxs, masks)
+        # pdb.set_trace()
         dist = self.dist(actor_features)
 
         if deterministic:
@@ -72,6 +71,7 @@ class Policy(nn.Module):
         return value
 
     def evaluate_actions(self, inputs, rnn_hxs, masks, action):
+        # pdb.set_trace()
         value, actor_features, rnn_hxs = self.base(inputs, rnn_hxs, masks)
         dist = self.dist(actor_features)
 
@@ -169,7 +169,8 @@ class NNBase(nn.Module):
 
 class CNNBase(NNBase):
     def __init__(self, num_inputs, recurrent=False, hidden_size=512):
-        super(CNNBase, self).__init__(recurrent, hidden_size, hidden_size)
+        super(CNNBase, self).__init__(recurrent, hidden_size+1, hidden_size+1)
+
 
         init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
                                constant_(x, 0), nn.init.calculate_gain('relu'))
@@ -192,18 +193,25 @@ class CNNBase(NNBase):
             init_(nn.Conv2d(32, 32, 3, stride=1)), nn.ReLU(), Flatten(),
             init_(nn.Linear(4096, hidden_size)), nn.ReLU())
 
-
         # pdb.set_trace()
         init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
                                constant_(x, 0))
 
-        self.critic_linear = init_(nn.Linear(hidden_size, 1))
+        self.critic_linear = init_(nn.Linear(hidden_size+1, 1)) # hidden_size+1 because of added sonar data
 
         self.train()
 
     def forward(self, inputs, rnn_hxs, masks):
-        inputs = inputs[:,0:3,:,:] # extract just the rgb image, inputs[0,3,0,0:7] is other info
-        x = self.main(inputs / 255.0)
+        rgb_input = inputs[:,0:3,:,:] # extract just the rgb image, inputs[0,3,0,0:7] is other info
+        sonar_input = inputs[0,3,0,6] # sonar value
+        x_rgb = self.main(rgb_input / 255.0)
+        # pdb.set_trace()
+        # print("x_rgb.shape: {} | sonar_input.shape: {}".format(x_rgb.shape ,sonar_input.reshape((1,1)).shape))
+
+        # if (x_rgb.shape[0] == 2):
+        #     pdb.set_trace()
+
+        x = torch.cat((x_rgb, sonar_input.reshape((1,1)).repeat(inputs.shape[0],1)), dim=1)
         # import IPython; IPython.embed(); exit()
         if self.is_recurrent:
             x, rnn_hxs = self._forward_gru(x, rnn_hxs, masks)
